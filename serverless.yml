@@ -8,8 +8,12 @@ provider:
       statements:
         - Effect: Allow
           Action: 'dynamodb:*'
-          Resource: 
-
+          Resource: arn:aws:dynamodb:us-east-1:416619464900:table/usersTable
+        - Effect: Allow
+          Action: 's3:*'
+          Resource: arn:aws:s3:::bucket-serverless-practice-32421/*
+  environment:
+    BUCKET: bucket-serverless-practice-32421
 plugins:
   - serverless-dynamodb
   - serverless-offline
@@ -67,7 +71,6 @@ functions:
                 id: true
             schemas:
               application/json: ${file(schemas/user-schema.json)}
-
   delete-users:
     handler: deleteUsers/handler.deleteUsers
     runtime: python3.8
@@ -79,7 +82,16 @@ functions:
             parameters:
               paths:
                 id: true
-
+  signed-urls:
+    handler: signedUrl/handler.signedS3Url
+    events:
+      - http:
+          path: signedurl
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                filename: true
 
 resources:
   Resources:
@@ -102,7 +114,7 @@ resources:
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
           BlockPublicPolicy: false
-        BucketName: 
+        BucketName: bucket-serverless-practice-32421
     SampleBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
