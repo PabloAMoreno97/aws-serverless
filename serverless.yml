@@ -14,18 +14,15 @@ provider:
           Resource: arn:aws:s3:::bucket-serverless-practice-32421/*
   environment:
     BUCKET: bucket-serverless-practice-32421
-plugins:
-  - serverless-dynamodb
-  - serverless-offline
+
+# plugins:
+#   - serverless-dynamodb
+#   - serverless-offline
 
 package:
   individually: true
   patterns:
-    - "!.dynamodb"
-    - "!node_modules"
-    - "!.venv"
-    - "!.env"
-    - "!.gitignore"
+    - "!*/**"
 
 custom:
   dynamodb:
@@ -42,6 +39,9 @@ custom:
 functions:
   get-users:
     handler: getUsers/handler.getUsers
+    package:
+      patterns:
+        - "getUsers/handler.js"
     events:
       - http:
           path: user/{id}
@@ -52,6 +52,9 @@ functions:
                 id: true
   create-users:
     handler: createUsers/handler.createUsers
+    package:
+      patterns:
+        - "createUsers/handler.js"
     events:
       - http:
           path: user
@@ -61,6 +64,9 @@ functions:
               application/json: ${file(schemas/user-schema.json)}
   update-users:
     handler: updateUsers/handler.updateUsers
+    package:
+      patterns:
+        - "updateUsers/handler.js"    
     events:
       - http:
           path: user/{id}
@@ -73,6 +79,9 @@ functions:
               application/json: ${file(schemas/user-schema.json)}
   delete-users:
     handler: deleteUsers/handler.deleteUsers
+    package:
+      patterns:
+        - "deleteUsers/handler.js"
     runtime: python3.8
     events:
       - http:
@@ -84,6 +93,9 @@ functions:
                 id: true
   signed-urls:
     handler: signedUrl/handler.signedS3Url
+    package:
+      patterns:
+        - "signedUrl/handler.js"    
     events:
       - http:
           path: signedurl
@@ -92,6 +104,19 @@ functions:
             parameters:
               querystrings:
                 filename: true
+  thumb-generator:
+    handler: thumbnail/handler.thumbnailGenerator
+    package: 
+      patterns:
+        - "thumbnail/handler.js"
+        - "node_modules/**"
+    events:
+      - s3:
+          bucket: bucket-serverless-practice-32421
+          event: s3:ObjectCreated:*
+          existing: true
+          rules:
+            - prefix: upload/
 
 resources:
   Resources:
