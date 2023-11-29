@@ -2,7 +2,7 @@ service: crud-serverless-users
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
   iam:
     role:
       statements:
@@ -23,6 +23,9 @@ package:
   individually: true
   patterns:
     - "!*/**"
+    - "!node_modules/**"
+    - "!*.zip"
+    - "!nodejs*"
 
 custom:
   dynamodb:
@@ -106,10 +109,11 @@ functions:
                 filename: true
   thumb-generator:
     handler: thumbnail/handler.thumbnailGenerator
+    layers:
+      - { Ref: BaseLambdaLayer }
     package: 
       patterns:
         - "thumbnail/handler.js"
-        - "node_modules/**"
     events:
       - s3:
           bucket: bucket-serverless-practice-32421
@@ -117,6 +121,18 @@ functions:
           existing: true
           rules:
             - prefix: upload/
+
+layers:
+  base:
+    name: "prd-dependencies"
+    description: "layer for nodejs prd dependencies"
+    licenseInfo: MIT
+    compatibleRuntimes:
+      - "nodejs18.x"
+    compatibleArchitectures:
+      - "x86_64"
+    package: 
+      artifact: nodejs.zip
 
 resources:
   Resources:
