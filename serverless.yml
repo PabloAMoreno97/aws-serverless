@@ -8,7 +8,7 @@ provider:
       statements:
         - Effect: Allow
           Action: 'dynamodb:*'
-          Resource: arn:aws:dynamodb:us-east-1:416619464900:table/usersTable
+          Resource: 
 
 plugins:
   - serverless-dynamodb
@@ -96,3 +96,26 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    S3Bucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+        BucketName: 
+    SampleBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref S3Bucket
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: Allow
+              Resource: !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3Bucket
+                  - /*
+              Principal: '*'
